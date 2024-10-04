@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <script> 
+    var getMood
+    var setMood
+  </script>
+  <script>
+    import {
+      createWalletCliet,
+      custom,
+      getContract,
+    } from "https://esm.sh/viem";
+    import { sepolia } from "https://esm.sh/viem/chains";
+
+    const walletClient = createWalletCliet({
+      chain : sepolia,
+      transport : custom(window.ethereum),
+    });
+
+    const accounts = await walletClient.requestAddress();
+
+    const [address] = accounts;
+
+    const MoodContractAddress = "0xEB18025DbB1604fAee140BBD81d452F4A2A475E1";
+    const MoodContractABI = [
+      {
+        "inputs": [],
+        "name": "getMood",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "_mood",
+            "type": "string"
+          }
+        ],
+        "name": "setMood",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ];
+
+    const MoodContractInstance = getContract({
+      address : MoodContractAddress,
+      abi : MoodContractABI,
+      client : walletClient,
+    });
+
+    getMood = async function() {
+      const mood = await MoodContractInstance.read.getMood();
+    }
+
+    setMood = async function() {
+      const mood = document.getElementById("mood").value;
+      await MoodContractInstance.write.setMood([mood], {
+        account : address
+      });
+    }
+
+  </script>
+
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="Z-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width", initial-scale="1.0" />
+        <title> LearnWeb3 First dApp </title>
+        <style>
+            body {
+              text-align: center;
+              font-family: Arial, Helvetica, sans-serif;
+            }
+          
+            div {
+              width: 20%;
+              margin: 0 auto;
+              display: flex;
+              flex-direction: column;
+            }
+          
+            button {
+              width: 100%;
+              margin: 10px 0px 5px 0px;
+            }
+          </style>
+    </head>
+    <body>
+        <div>
+            <h1>
+                This is my dApp!
+            </h1>
+            <p>
+                Here we can set or get the mood:
+            </p>
+            <label for="mood"> Input Mode: </label> <br />
+            <input type="text" id="mood" />
+
+            <button onclick="getMood()">Get Mood</button>
+            <button onclick="setMood()">Set Mood</button>
+            <p id="showMood"></p>
+        </div>
+    </body>
+</html>
